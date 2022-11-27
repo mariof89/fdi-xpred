@@ -1,7 +1,7 @@
 from streamlit.proto.PlotlyChart_pb2 import PlotlyChart as PlotlyChartProto
 from sklearn.preprocessing import MinMaxScaler, StandardScaler
 import altair.vegalite.v4 as alt
-import stats
+
 import matplotlib.pyplot as plt
 import matplotlib.gridspec as gridspec
 import matplotlib.spines as spines
@@ -20,6 +20,8 @@ import ast
 from scipy.ndimage import gaussian_filter
 
 import df_operations as dfo
+import stats
+import utilities
 import time
 from mplsoccer.pitch import Pitch, VerticalPitch
 from mplsoccer import PyPizza, Radar
@@ -36,6 +38,7 @@ st.set_page_config(layout="wide")
 
 @st.cache(allow_output_mutation=True, show_spinner=False)
 def from_image_to_b64(path):
+    return utilities.from_image_to_b64(path=path)
     image = Image.open(path)
     output = io.BytesIO()
     image.save(output, format='PNG')
@@ -69,6 +72,12 @@ def split_home_away(df: pd.DataFrame):
 @st.cache(allow_output_mutation=True, show_spinner=False)
 def group_by_sum(df: pd.DataFrame, cols_grouping: list, use_for_index: bool):
     return df.groupby(cols_grouping, as_index=use_for_index).sum()
+
+
+@st.cache(allow_output_mutation=True, show_spinner=False)
+def get_events_previous(df: pd.DataFrame, selected_round: int, previous: int):
+    return df_events[(df['Giornata'] < selected_round) &
+                     (df['Giornata'] >= selected_round - previous)]
 
 
 def truncate_string(full_name: str):
@@ -216,24 +225,11 @@ team_away = match_list_by_selected_round.loc[match_list_by_selected_round.game_i
                                              selected_match]['team_away'].values[0]
 
 home_team, away_team = st.columns(2)
-st.markdown(
-    """
 
-    <style>
-        div[data-testid=column] {
-            text-align:center;
-        }
-        div[data-testid=stImage] {         
-            display: block;
-            margin: auto;
-        }
-    </style>
-   
-    """, unsafe_allow_html=True
-)
 with home_team:
+    _placeholder = st.empty()
     img_home = Image.open(f'logos/{team_home}.png')
-    st.image(img_home, width=60)
+    _placeholder.image(img_home, width=60)
 with away_team:
     img_home = Image.open(f'logos/{team_away}.png')
     st.image(img_home, width=60)
@@ -693,6 +689,7 @@ df_players_away_team_minutes_filtered = df_players_away_team[
     (df_players_away_team['mins_played'] >= selected_mins_played_min) &
     (df_players_away_team['mins_played'] < selected_mins_played_max)]
 
+
 attacking_metrics_p90 = []
 for _m in stats.attacking_metrics:
     df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
@@ -865,7 +862,9 @@ fig_pizza_offensive, ax = pizza(
     values_home=values_home,
     values_away=values_away,
     color_home='steelblue',
-    color_away='lightgreen').draw()
+    color_away='lightgreen',
+    team_home=team_home,
+    team_away=team_away).draw()
 
 fig_pizza_offensive.set_size_inches(10, 10)
 
@@ -880,7 +879,9 @@ fig_pizza_defensive, ax = pizza(
     values_home=values_home,
     values_away=values_away,
     color_home='steelblue',
-    color_away='lightgreen').draw()
+    color_away='lightgreen',
+    team_home=team_home,
+    team_away=team_away).draw()
 
 fig_pizza_defensive.set_size_inches(10, 10)
 
@@ -895,7 +896,9 @@ fig_pizza_passing, ax = pizza(
     values_home=values_home,
     values_away=values_away,
     color_home='steelblue',
-    color_away='lightgreen').draw()
+    color_away='lightgreen',
+    team_home=team_home,
+    team_away=team_away).draw()
 
 fig_pizza_passing.set_size_inches(10, 10)
 
@@ -910,12 +913,18 @@ fig_pizza_physical, ax = pizza(
     values_home=values_home,
     values_away=values_away,
     color_home='steelblue',
-    color_away='lightgreen').draw()
+    color_away='lightgreen',
+    team_home=team_home,
+    team_away=team_away).draw()
 
 fig_pizza_passing.set_size_inches(10, 10)
 
-df_previous_selected_round = df_events[(df_events['Giornata'] < selected_round) &
-                                       (df_events['Giornata'] >= selected_round - 5)]
+events_previos_rounds = 5
+
+df_previous_selected_round = get_events_previous(
+    df_events, selected_round=selected_round, previous=events_previos_rounds)
+# df_previous_selected_round = df_events[(df_events['Giornata'] < selected_round) &
+#                                       (df_events['Giornata'] >= selected_round - 5)]
 
 df_previous_selected_round['key'] = df_previous_selected_round.apply(
     lambda x: f"{x['Partita'].split('-')[0].title()}_{x['Partita'].split('-')[1].title()}_{x['Giornata']}", axis=1
@@ -1021,6 +1030,7 @@ fig_pitch_passing_heatmap, _ = hape.instantiate_figure_heatmap()
 tab_attacking_metrics, tab_defensive_metrics, tab_passing_metrics, tab_physical_metrics = st.tabs(
     ["Offensive Metrics", "Defensive Metrics", "Passing Metrics", "Physical Metrics"])
 
+_events_string = f'### Events based on previous {events_previos_rounds} matches'
 with tab_attacking_metrics:
     _home_col, _away_col = st.columns(2)
     with _home_col:
@@ -1042,6 +1052,7 @@ with tab_attacking_metrics:
     with _left:
         st.pyplot(fig_pizza_offensive)
     with _right:
+        st.markdown(_events_string)
         st.pyplot(fig_pitch_offensive)
 
 with tab_defensive_metrics:
@@ -1063,6 +1074,7 @@ with tab_defensive_metrics:
     with _left:
         st.pyplot(fig_pizza_defensive)
     with _right:
+        st.markdown(_events_string)
         st.pyplot(fig_pitch_defensive_shots_goals)
         st.pyplot(fig_pitch_defensive_heatmap)
 
@@ -1084,6 +1096,7 @@ with tab_passing_metrics:
     with _left:
         st.pyplot(fig_pizza_passing)
     with _right:
+        st.markdown(_events_string)
         st.pyplot(fig_pitch_assist)
         st.pyplot(fig_pitch_passing_heatmap)
 
@@ -1101,8 +1114,9 @@ with tab_physical_metrics:
         for _chart in chart_away_physical:
             _chart_away &= _chart
         st.altair_chart(_chart_away, use_container_width=True)
-    _left, _right = st.columns([1, 1])
-    with _left:
+
+    _, _center, _ = st.columns([1, 2, 1])
+    with _center:
         st.pyplot(fig_pizza_physical)
 
 # st.plotly_chart(ply.plot_mpl(f), use_container_width=True)
@@ -1112,13 +1126,34 @@ with tab_physical_metrics:
 container = st.container()
 st.write("Predictions")
 df_sel_match = df_simulated_matches.loc[selected_match]
-st.write(df_simulated_matches.loc[selected_match])
+
 h_score_probability = ast.literal_eval(df_sel_match['p_home_score'])
 a_score_probability = ast.literal_eval(df_sel_match['p_away_score'])
 
-x, y = np.meshgrid(range(0, 5), range(0, 5))
-z = h_score_probability * a_score_probability
+x, y = np.meshgrid(h_score_probability, a_score_probability)
+z = x * y
+
+x, y = np.meshgrid([0, 1, 2, 3, 4, 5], [0, 1, 2, 3, 4, 5])
+
+_, center, _ = st.columns([1, 2, 1])
 source = pd.DataFrame({'x': x.ravel(),
                        'y': y.ravel(),
                        'z': z.ravel()})
+
+chart = alt.layer()
+with center:
+    chart += alt.Chart(source).mark_rect().encode(
+        alt.X('x:O', title=f'{team_home} Goal Probabilities %'),
+        alt.Y('y:O', title=f'{team_away} Goal Probabilities %'),
+        color=alt.Color('z:Q', title='Goal Prob')
+    ).properties(
+        height=400
+    )
+    chart += alt.Chart(source).mark_text().encode(
+        # , axis=alt.Axis(orient="left")),
+        x=alt.X('x:O', axis=alt.Axis(orient='top', labelAngle=45)),
+        y=alt.Y('y:O', axis=alt.Axis(orient='left')),
+        text=alt.Text('z:Q', format='.2f'))
+    st.altair_chart(chart, use_container_width=True)
+
 print("--- %s seconds ---" % (time.time() - start_time))
