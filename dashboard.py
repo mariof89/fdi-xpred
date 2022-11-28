@@ -179,7 +179,8 @@ def main_page():
             start_time_read_players = time.time()
             df_players_read = read_csv(path_players)
 
-            df_players = df_players_read.copy(deep=True)
+            df_players = df_players_read.copy(deep=True)[
+                list(df_players_read.columns)[0:13]+['Match', 'matchday']+stats.attacking_metrics+stats.defensive_metrics+stats.physical_metrics+stats.passing_metrics+stats.shots]
             # ** !! Fix per Samuele Ricci: da togliere nelle righe dell'empoli
             df_players.drop(df_players[(df_players.opta_id == 450023) & (
                 df_players.game_id == 2229098)].index, inplace=True)
@@ -518,7 +519,8 @@ def main_page():
         title=f'Previous matches {team_home}',
 
     ).properties(
-        height=300)
+        height=300,
+        width=450)
 
     ipochart_area_home = alt.Chart(df_spline_home).mark_area(opacity=.8).encode(
         x=alt.X('x2',
@@ -617,7 +619,8 @@ def main_page():
         title=f'Previous matches {team_away}',
 
     ).properties(
-        height=300)
+        height=300,
+        width=450)
 
     ipochart_area_away = alt.Chart(df_spline_away).mark_area(opacity=.7, color=color_away_team).encode(
         x=alt.X('x2',
