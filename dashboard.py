@@ -226,13 +226,15 @@ team_away = match_list_by_selected_round.loc[match_list_by_selected_round.game_i
 
 home_team, away_team = st.columns(2)
 
-with home_team:
-    _placeholder = st.empty()
-    img_home = Image.open(f'logos/{team_home}.png')
-    _placeholder.image(img_home, width=60)
-with away_team:
-    img_home = Image.open(f'logos/{team_away}.png')
-    st.image(img_home, width=60)
+_logos = st.container()
+with _logos:
+    with home_team:
+        _placeholder = st.empty()
+        img_home = Image.open(f'logos/{team_home}.png')
+        _placeholder.image(img_home, width=60)
+    with away_team:
+        img_home = Image.open(f'logos/{team_away}.png')
+        st.image(img_home, width=60)
 
 # IPO of matches played by team_home (every matches is depicted on 2 rows)
 df_ipo_by_match_home = filter_all_matches_by_team(
@@ -613,37 +615,40 @@ ipo_bars_away = alt.Chart(df_prev_a_played_ha).mark_bar(size=8,
     height=100,
 )
 
-home_col, away_col = st.columns(2)
+container_ipo = st.container()
 
-with home_col:
-    _all = alt.vconcat(ipochart_home, ipo_bars_home).configure_view(
-        stroke=None).configure_axis(grid=False).properties(
-        padding=0
-    )
-    # st.write(df_ipo_by_match_home_ha_data)
+with container_ipo:
+    home_col, _, away_col = st.columns([10, 1, 10])
 
-    # st.write(df_ipo_by_match_home)
+    with home_col:
+        _all = alt.vconcat(ipochart_home, ipo_bars_home).configure_view(
+            stroke=None).configure_axis(grid=False).properties(
+            padding=0
+        )
+        # st.write(df_ipo_by_match_home_ha_data)
 
-    # st.write(df_ipo_by_match_home_only_other_team)
-    home_col.altair_chart(_all.resolve_scale(
-        color='independent', x='shared'), use_container_width=True)
-    # home_col.altair_chart(ipochart)
-    # _all.resolve_scale(color='independent', x='shared'), use_container_width=True)
+        # st.write(df_ipo_by_match_home)
 
-with away_col:
+        # st.write(df_ipo_by_match_home_only_other_team)
+        home_col.altair_chart(_all.resolve_scale(
+            color='independent', x='shared'), use_container_width=True)
+        # home_col.altair_chart(ipochart)
+        # _all.resolve_scale(color='independent', x='shared'), use_container_width=True)
 
-    _all = alt.vconcat(
-        ipochart_area_home + ipochart_area_away + ipochart_line_away +
-        ipochart_line_match + team_logos + dots_ipo,
-        ipo_bars_away
-    ).configure_view(
-        stroke=None).configure_axis(grid=False).properties(
-        padding=0
-    )
+    with away_col:
 
-    away_col.altair_chart(_all.resolve_scale(
-        color='independent', x='shared'), use_container_width=True)
+        _all = alt.vconcat(
+            ipochart_area_home + ipochart_area_away + ipochart_line_away +
+            ipochart_line_match + team_logos + dots_ipo,
+            ipo_bars_away
+        ).configure_view(
+            stroke=None).configure_axis(grid=False).properties(
+            padding=0
+        )
 
+        away_col.altair_chart(_all.resolve_scale(
+            color='independent', x='shared'), use_container_width=True)
+st.markdown("""---""")
 team_id_home = team_id_name_logo[team_id_name_logo.team ==
                                  team_home]['team_id'].values[0]
 team_id_away = team_id_name_logo[team_id_name_logo.team ==
@@ -1047,6 +1052,7 @@ with tab_attacking_metrics:
 
         st.altair_chart(_chart_away, use_container_width=True)
 
+    st.markdown("""---""")
     _left, _right = st.columns([1, 1])
 
     with _left:
@@ -1070,6 +1076,8 @@ with tab_defensive_metrics:
             _chart_away &= _chart
 
         st.altair_chart(_chart_away, use_container_width=True)
+
+    st.markdown("""---""")
     _left, _right = st.columns([1, 1])
     with _left:
         st.pyplot(fig_pizza_defensive)
@@ -1092,6 +1100,7 @@ with tab_passing_metrics:
         for _chart in chart_away_passing:
             _chart_away &= _chart
         st.altair_chart(_chart_away, use_container_width=True)
+    st.markdown("""---""")
     _left, _right = st.columns([1, 1])
     with _left:
         st.pyplot(fig_pizza_passing)
@@ -1114,14 +1123,14 @@ with tab_physical_metrics:
         for _chart in chart_away_physical:
             _chart_away &= _chart
         st.altair_chart(_chart_away, use_container_width=True)
-
+    st.markdown("""---""")
     _, _center, _ = st.columns([1, 2, 1])
     with _center:
         st.pyplot(fig_pizza_physical)
 
 # st.plotly_chart(ply.plot_mpl(f), use_container_width=True)
 
-
+st.markdown("""---""")
 # df_players_home_team_defensive = df_players_home_team[]
 container = st.container()
 st.write("Predictions")

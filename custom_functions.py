@@ -21,6 +21,7 @@ class HomeAwayOffensiveShotsGoals:
                               pitch_width=68, line_zorder=12, half=True)
 
         pitch.draw(ax=ax[0][0])
+
         pitch.scatter(x=self.df_shots_home['P0 norm x'],
                       y=self.df_shots_home['P0 norm y'],
                       s=100,
@@ -37,7 +38,6 @@ class HomeAwayOffensiveShotsGoals:
                       marker='*',
                       ax=ax[0][0])
         ax[0][0].set_title(f'Shotmap {self.team_home}')
-
         # secondo grafico: shot map away team
         pitch.draw(ax=ax[0][1])
         pitch.scatter(x=self.df_shots_away['P0 norm x'],
