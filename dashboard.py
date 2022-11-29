@@ -1160,6 +1160,9 @@ def main_page():
         print("--- %s seconds pyplot offensive---" %
               (time.time() - start_time))
     with tab_defensive_metrics:
+        _, _c, _ = st.columns([1, 4, 1])
+        _c.markdown(
+            f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
         _events_string = f'### Defensive events based on previous {events_previos_rounds} matches'
         _home_col_def, _away_col_def = st.columns(2)
         with _home_col_def:
@@ -1188,6 +1191,9 @@ def main_page():
                   (time.time() - start_time))
 
     with tab_passing_metrics:
+        _, _c, _ = st.columns([1, 4, 1])
+        _c.markdown(
+            f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
         _events_string = f'### Passing events based on previous {events_previos_rounds} matches'
         _home_col, _away_col = st.columns(2)
         with _home_col:
@@ -1214,6 +1220,9 @@ def main_page():
                   (time.time() - start_time))
 
     with tab_physical_metrics:
+        _, _c, _ = st.columns([1, 4, 1])
+        _c.markdown(
+            f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
         _events_string = f'### Physical events based on previous {events_previos_rounds} matches'
         _home_col, _away_col = st.columns(2)
         with _home_col:
