@@ -873,14 +873,16 @@ def main_page():
                                                                      cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
             chart_away_offensive.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
                                                                      cornerRadiusTopRight=10,
                                                                      cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
 
         if _m in defensive_metrics_p90:
@@ -889,14 +891,16 @@ def main_page():
                                                                      cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
             chart_away_defensive.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
                                                                      cornerRadiusTopRight=10,
                                                                      cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
 
         if _m in passing_metrics_p90:
@@ -905,14 +909,16 @@ def main_page():
                                                                    cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
             chart_away_passing.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
                                                                    cornerRadiusTopRight=10,
                                                                    cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
 
         if _m in physical_metrics_p90:
@@ -921,14 +927,16 @@ def main_page():
                                                                     cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
             chart_away_physical.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
                                                                     cornerRadiusTopRight=10,
                                                                     cornerRadiusBottomRight=10).encode(
                 y=alt.Y('full_name_t:O', sort='-x', title=None),
                 x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1]))
+                    domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
             ))
 
     df_team_previous = df_players[(df_players['matchday'] < selected_round)].groupby(['team', 'team_id'],
