@@ -515,7 +515,7 @@ def main_page():
         })
         x_scale = alt.Scale(domain=[1, df_ipo_by_match_home['matchday'].max()])
         max_ipo_scale = alt.Scale(
-            domain=[0, np.max([df_spline_home['y_considered_team'].max(), df_spline_away['y_considered_team'].max()])])
+            domain=[0, np.max([df_spline_home['y_considered_team'].max(), df_spline_home['y_other_team'].max(), df_spline_away['y_considered_team'].max(), df_spline_away['y_other_team'].max()])])
 
         print("Before Starting Charts")
         if 'ipo_home' not in st.session_state:
