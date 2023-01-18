@@ -20,6 +20,7 @@ import asyncio
 from scipy.ndimage import gaussian_filter
 from pathlib import Path
 import df_operations as dfo
+
 import stats
 import utilities
 import time
@@ -757,7 +758,8 @@ def main_page():
             [df_players_home_team['mins_played'].max(),
              df_players_away_team['mins_played'].max()]))
 
-        max_x_axis = int(min_mins_played - int(min_mins_played * 0.1))
+        print("min_mins_played "+ str(min_mins_played))
+        max_x_axis = int(min_mins_played + int(min_mins_played * 0.1))
         mins_step = 30
         _range = [i for i in range(0, max_x_axis - max_x_axis %
                                    mins_step, mins_step)]
@@ -788,57 +790,11 @@ def main_page():
             (df_players_away_team['mins_played'] >= selected_mins_played_min) &
             (df_players_away_team['mins_played'] < selected_mins_played_max)]
 
-        attacking_metrics_p90 = []
-        for _m in stats.attacking_metrics:
-            df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
-                (df_players_home_team['mins_played'] / 90)
-            df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
-                (df_players_away_team['mins_played'] / 90)
-            attacking_metrics_p90.append(f'{_m}_p90')
-
-        defensive_metrics_p90 = []
-        for _m in stats.defensive_metrics:
-            df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
-                (df_players_home_team['mins_played'] / 90)
-            df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
-                (df_players_away_team['mins_played'] / 90)
-            defensive_metrics_p90.append(f'{_m}_p90')
-
-        passing_metrics_p90 = []
-        for _m in stats.passing_metrics:
-            df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
-                (df_players_home_team['mins_played'] / 90)
-            df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
-                (df_players_away_team['mins_played'] / 90)
-            passing_metrics_p90.append(f'{_m}_p90')
-
-        physical_metrics_p90 = []
-        for _m in stats.physical_metrics:
-            df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
-                (df_players_home_team['mins_played'] / 90)
-            df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
-                (df_players_away_team['mins_played'] / 90)
-            physical_metrics_p90.append(f'{_m}_p90')
-
-        for _spread in stats.spreads:
-            _metrics = _spread.split('-')
-            print(_spread)
-            print(_metrics)
-
-            if len(_metrics) == 2:
-                _m1 = _metrics[0]
-                _m2 = _metrics[1]
-                df_players_home_team_minutes_filtered[f'{_spread}'] = df_players_home_team_minutes_filtered.apply(
-                    lambda x: x[f'{_m1}_p90'] - x[f'{_m2}_p90'], axis=1)
-                df_players_away_team_minutes_filtered[f'{_spread}'] = df_players_away_team_minutes_filtered.apply(
-                    lambda x: x[f'{_m1}_p90'] - x[f'{_m2}_p90'], axis=1)
-
-                df_players_home_team_minutes_filtered[f'{_spread}_p90'] = df_players_home_team_minutes_filtered.apply(
-                    lambda x: (x[f'{_m1}_p90'] - x[f'{_m2}_p90']) / (x['mins_played'] / 90), axis=1)
-                df_players_away_team_minutes_filtered[f'{_spread}_p90'] = df_players_away_team_minutes_filtered.apply(
-                    lambda x: (x[f'{_m1}_p90'] - x[f'{_m2}_p90']) / (x['mins_played'] / 90), axis=1)
-                # attacking_metrics_p90.append(f'{_spread}_p90')
-
+        #print(_range)
+        #print(selected_mins_played_min)
+        #print(selected_mins_played_max)
+        #print(df_players_home_team_minutes_filtered[['full_name','mins_played', 'Gol']])
+        #print(df_players_away_team_minutes_filtered[['full_name','mins_played', 'Gol']])
         max_metrics_for_scale_domain = {}
 
         chart_home_offensive = []
@@ -853,100 +809,156 @@ def main_page():
         chart_home_physical = []
         chart_away_physical = []
 
-        metrics_to_be_considered = attacking_metrics_p90 + \
-            defensive_metrics_p90 + passing_metrics_p90 + physical_metrics_p90
+        no_data_to_display = True
+        if not df_players_home_team_minutes_filtered.empty and not df_players_away_team_minutes_filtered.empty:
+            no_data_to_display = False
+            attacking_metrics_p90 = []
+            for _m in stats.attacking_metrics:
+                df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
+                    (df_players_home_team['mins_played'] / 90)
+                df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
+                    (df_players_away_team['mins_played'] / 90)
+                attacking_metrics_p90.append(f'{_m}_p90')
 
-        for _m in metrics_to_be_considered:
-            _df_home = df_players_home_team_minutes_filtered.sort_values(
-                _m, ascending=False).head(5)
-            _df_away = df_players_away_team_minutes_filtered.sort_values(
-                _m, ascending=False).head(5)
+            defensive_metrics_p90 = []
+            for _m in stats.defensive_metrics:
+                df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
+                    (df_players_home_team['mins_played'] / 90)
+                df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
+                    (df_players_away_team['mins_played'] / 90)
+                defensive_metrics_p90.append(f'{_m}_p90')
 
-            _max_away = _df_away[_m].max()
-            _max_home = _df_home[_m].max()
+            passing_metrics_p90 = []
+            for _m in stats.passing_metrics:
+                df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
+                    (df_players_home_team['mins_played'] / 90)
+                df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
+                    (df_players_away_team['mins_played'] / 90)
+                passing_metrics_p90.append(f'{_m}_p90')
 
-            if _max_away > _max_home:
-                max_metrics_for_scale_domain[_m] = _max_away
-            else:
-                max_metrics_for_scale_domain[_m] = _max_home
+            physical_metrics_p90 = []
+            for _m in stats.physical_metrics:
+                df_players_home_team_minutes_filtered[f'{_m}_p90'] = df_players_home_team[_m] / \
+                    (df_players_home_team['mins_played'] / 90)
+                df_players_away_team_minutes_filtered[f'{_m}_p90'] = df_players_away_team[_m] / \
+                    (df_players_away_team['mins_played'] / 90)
+                physical_metrics_p90.append(f'{_m}_p90')
 
-            _df_home['full_name_t'] = _df_home.apply(
-                lambda x: dfo.trunc_string(x['full_name']), axis=1)
+            for _spread in stats.spreads:
+                _metrics = _spread.split('-')
+                print(_spread)
+                print(_metrics)
 
-            _df_away['full_name_t'] = _df_away.apply(
-                lambda x: dfo.trunc_string(x['full_name']), axis=1)
+                if len(_metrics) == 2:
+                    _m1 = _metrics[0]
+                    _m2 = _metrics[1]
+                    df_players_home_team_minutes_filtered[f'{_spread}'] = df_players_home_team_minutes_filtered.apply(
+                        lambda x: x[f'{_m1}_p90'] - x[f'{_m2}_p90'], axis=1)
+                    df_players_away_team_minutes_filtered[f'{_spread}'] = df_players_away_team_minutes_filtered.apply(
+                        lambda x: x[f'{_m1}_p90'] - x[f'{_m2}_p90'], axis=1)
 
-            if _m in attacking_metrics_p90:
-                chart_home_offensive.append(alt.Chart(_df_home).mark_bar(opacity=.8,
-                                                                         cornerRadiusTopRight=10,
-                                                                         cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
-                chart_away_offensive.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
-                                                                         cornerRadiusTopRight=10,
-                                                                         cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
+                    df_players_home_team_minutes_filtered[f'{_spread}_p90'] = df_players_home_team_minutes_filtered.apply(
+                        lambda x: (x[f'{_m1}_p90'] - x[f'{_m2}_p90']) / (x['mins_played'] / 90), axis=1)
+                    df_players_away_team_minutes_filtered[f'{_spread}_p90'] = df_players_away_team_minutes_filtered.apply(
+                        lambda x: (x[f'{_m1}_p90'] - x[f'{_m2}_p90']) / (x['mins_played'] / 90), axis=1)
+                    # attacking_metrics_p90.append(f'{_spread}_p90')
 
-            if _m in defensive_metrics_p90:
-                chart_home_defensive.append(alt.Chart(_df_home).mark_bar(opacity=.8,
-                                                                         cornerRadiusTopRight=10,
-                                                                         cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
-                chart_away_defensive.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
-                                                                         cornerRadiusTopRight=10,
-                                                                         cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
 
-            if _m in passing_metrics_p90:
-                chart_home_passing.append(alt.Chart(_df_home).mark_bar(opacity=.8,
-                                                                       cornerRadiusTopRight=10,
-                                                                       cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
-                chart_away_passing.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
-                                                                       cornerRadiusTopRight=10,
-                                                                       cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
+            metrics_to_be_considered = attacking_metrics_p90 + \
+                defensive_metrics_p90 + passing_metrics_p90 + physical_metrics_p90
 
-            if _m in physical_metrics_p90:
-                chart_home_physical.append(alt.Chart(_df_home).mark_bar(opacity=.8,
-                                                                        cornerRadiusTopRight=10,
-                                                                        cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
-                chart_away_physical.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
-                                                                        cornerRadiusTopRight=10,
-                                                                        cornerRadiusBottomRight=10).encode(
-                    y=alt.Y('full_name_t:O', sort='-x', title=None),
-                    x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
-                        domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
-                    tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
-                ))
+            for _m in metrics_to_be_considered:
+
+                _df_home = df_players_home_team_minutes_filtered.sort_values(
+                    _m, ascending=False).head(5)
+                _df_away = df_players_away_team_minutes_filtered.sort_values(
+                    _m, ascending=False).head(5)
+
+                _max_away = _df_away[_m].max()
+                _max_home = _df_home[_m].max()
+
+                if _max_away > _max_home:
+                    max_metrics_for_scale_domain[_m] = _max_away
+                else:
+                    max_metrics_for_scale_domain[_m] = _max_home
+
+                _df_home['full_name_t'] = _df_home.apply(
+                    lambda x: dfo.trunc_string(x['full_name']), axis=1)
+
+                _df_away['full_name_t'] = _df_away.apply(
+                    lambda x: dfo.trunc_string(x['full_name']), axis=1)
+
+                if _m in attacking_metrics_p90:
+                    chart_home_offensive.append(alt.Chart(_df_home).mark_bar(opacity=.8,
+                                                                             cornerRadiusTopRight=10,
+                                                                             cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+                    chart_away_offensive.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
+                                                                             cornerRadiusTopRight=10,
+                                                                             cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+
+                if _m in defensive_metrics_p90:
+                    chart_home_defensive.append(alt.Chart(_df_home).mark_bar(opacity=.8,
+                                                                             cornerRadiusTopRight=10,
+                                                                             cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+                    chart_away_defensive.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
+                                                                             cornerRadiusTopRight=10,
+                                                                             cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+
+                if _m in passing_metrics_p90:
+                    chart_home_passing.append(alt.Chart(_df_home).mark_bar(opacity=.8,
+                                                                           cornerRadiusTopRight=10,
+                                                                           cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+                    chart_away_passing.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
+                                                                           cornerRadiusTopRight=10,
+                                                                           cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+
+                if _m in physical_metrics_p90:
+                    chart_home_physical.append(alt.Chart(_df_home).mark_bar(opacity=.8,
+                                                                            cornerRadiusTopRight=10,
+                                                                            cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
+                    chart_away_physical.append(alt.Chart(_df_away).mark_bar(opacity=.8, color='lightgreen',
+                                                                            cornerRadiusTopRight=10,
+                                                                            cornerRadiusBottomRight=10).encode(
+                        y=alt.Y('full_name_t:O', sort='-x', title=None),
+                        x=alt.X(f"{_m}:Q", title=_m, scale=alt.Scale(
+                            domain=[0, max_metrics_for_scale_domain[_m] * 1.1])),
+                        tooltip=['full_name', alt.Tooltip(f'{_m}:Q', format='.2f')]
+                    ))
 
         df_team_previous = df_players[(df_players['matchday'] < selected_round)].groupby(['team', 'team_id'],
                                                                                          as_index=False).sum().set_index(
@@ -1196,22 +1208,25 @@ def main_page():
             _c.markdown(
                 f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
             _events_string = f'### Offensive events based on previous {events_previos_rounds} matches'
-            _home_col, _away_col = st.columns(2)
-            with _home_col:
-                _chart_home = alt.vconcat()
-                for _chart in chart_home_offensive:
-                    _chart_home &= _chart
+            if no_data_to_display:
+                _c.markdown('#### <span style="color:red">No data to display.</span><br>Try to relax filters on minutes played', unsafe_allow_html=True)
+            else:
+                _home_col, _away_col = st.columns(2)
+                with _home_col:
+                    _chart_home = alt.vconcat()
+                    for _chart in chart_home_offensive:
+                        _chart_home &= _chart
 
-                st.altair_chart(_chart_home, use_container_width=True)
+                    st.altair_chart(_chart_home, use_container_width=True)
 
-            with _away_col:
-                _chart_away = alt.vconcat()
-                for _chart in chart_away_offensive:
-                    _chart_away &= _chart
+                with _away_col:
+                    _chart_away = alt.vconcat()
+                    for _chart in chart_away_offensive:
+                        _chart_away &= _chart
 
-                st.altair_chart(_chart_away, use_container_width=True)
-            print("--- %s seconds attacking metrics charts---" %
-                  (time.time() - start_time))
+                    st.altair_chart(_chart_away, use_container_width=True)
+                print("--- %s seconds attacking metrics charts---" %
+                      (time.time() - start_time))
             st.markdown("""---""")
             _left, _right = st.columns([1, 1])
 
@@ -1231,20 +1246,23 @@ def main_page():
             _c.markdown(
                 f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
             _events_string = f'### Defensive events based on previous {events_previos_rounds} matches'
-            _home_col_def, _away_col_def = st.columns(2)
-            with _home_col_def:
-                _chart_home = alt.vconcat()
-                for _chart in chart_home_defensive:
-                    _chart_home &= _chart
+            if no_data_to_display:
+                _c.markdown('#### <span style="color:red">No data to display.</span><br>Try to relax filters on minutes played', unsafe_allow_html=True)
+            else:
+                _home_col_def, _away_col_def = st.columns(2)
+                with _home_col_def:
+                    _chart_home = alt.vconcat()
+                    for _chart in chart_home_defensive:
+                        _chart_home &= _chart
 
-                st.altair_chart(_chart_home, use_container_width=True)
+                    st.altair_chart(_chart_home, use_container_width=True)
 
-            with _away_col_def:
-                _chart_away = alt.vconcat()
-                for _chart in chart_away_defensive:
-                    _chart_away &= _chart
+                with _away_col_def:
+                    _chart_away = alt.vconcat()
+                    for _chart in chart_away_defensive:
+                        _chart_away &= _chart
 
-                st.altair_chart(_chart_away, use_container_width=True)
+                    st.altair_chart(_chart_away, use_container_width=True)
 
             st.markdown("""---""")
             _left, _right = st.columns([1, 1])
@@ -1270,19 +1288,22 @@ def main_page():
             _c.markdown(
                 f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
             _events_string = f'### Passing events based on previous {events_previos_rounds} matches'
-            _home_col, _away_col = st.columns(2)
-            with _home_col:
-                _chart_home = alt.vconcat()
-                for _chart in chart_home_passing:
-                    _chart_home &= _chart
+            if no_data_to_display:
+                _c.markdown('#### <span style="color:red">No data to display.</span><br>Try to relax filters on minutes played', unsafe_allow_html=True)
+            else:
+                _home_col, _away_col = st.columns(2)
+                with _home_col:
+                    _chart_home = alt.vconcat()
+                    for _chart in chart_home_passing:
+                        _chart_home &= _chart
 
-                st.altair_chart(_chart_home, use_container_width=True)
+                    st.altair_chart(_chart_home, use_container_width=True)
 
-            with _away_col:
-                _chart_away = alt.vconcat()
-                for _chart in chart_away_passing:
-                    _chart_away &= _chart
-                st.altair_chart(_chart_away, use_container_width=True)
+                with _away_col:
+                    _chart_away = alt.vconcat()
+                    for _chart in chart_away_passing:
+                        _chart_away &= _chart
+                    st.altair_chart(_chart_away, use_container_width=True)
             st.markdown("""---""")
             _left, _right = st.columns([1, 1])
             with _left:
@@ -1308,21 +1329,24 @@ def main_page():
             _c.markdown(
                 f'#### <span style="color:steelblue">{team_home}</span> & <span style="color:lightgreen">{team_away}</span> Top Players who played between {selected_mins_played_min} and {selected_mins_played_max} minutes', unsafe_allow_html=True)
             _events_string = f'### Physical events based on previous {events_previos_rounds} matches'
-            _home_col, _away_col = st.columns(2)
-            with _home_col:
-                _chart_home = alt.vconcat()
-                for _chart in chart_home_physical:
-                    _chart_home &= _chart
+            if no_data_to_display:
+                _c.markdown('#### <span style="color:red">No data to display.</span><br>Try to relax filters on minutes played', unsafe_allow_html=True)
+            else:
+                _home_col, _away_col = st.columns(2)
+                with _home_col:
+                    _chart_home = alt.vconcat()
+                    for _chart in chart_home_physical:
+                        _chart_home &= _chart
 
-                st.altair_chart(_chart_home, use_container_width=True)
+                    st.altair_chart(_chart_home, use_container_width=True)
 
-            with _away_col:
-                _chart_away = alt.vconcat()
-                for _chart in chart_away_physical:
-                    _chart_away &= _chart
-                st.altair_chart(_chart_away, use_container_width=True)
-            print("--- %s seconds physical metrics---" %
-                  (time.time() - start_time))
+                with _away_col:
+                    _chart_away = alt.vconcat()
+                    for _chart in chart_away_physical:
+                        _chart_away &= _chart
+                    st.altair_chart(_chart_away, use_container_width=True)
+                print("--- %s seconds physical metrics---" %
+                      (time.time() - start_time))
             st.markdown("""---""")
             _, _center, _ = st.columns([1, 2, 1])
             with _center:
